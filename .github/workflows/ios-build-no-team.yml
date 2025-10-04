@@ -1,4 +1,4 @@
-```yaml
+```
 name: Build iOS App (No Team ID)
 
 on:
