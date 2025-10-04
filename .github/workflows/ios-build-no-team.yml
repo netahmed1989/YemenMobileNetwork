@@ -1,0 +1,38 @@
+```yaml
+name: Build iOS App (No Team ID)
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Xcode
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: latest-stable
+    
+    - name: Build iOS App (Automatic Signing)
+      run: |
+        cd YemenMobileApp
+        xcodebuild -scheme YemenMobileApp -configuration Release -destination generic/platform=iOS CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO -archivePath YemenMobileApp.xcarchive archive
+        xcodebuild -exportArchive -archivePath YemenMobileApp.xcarchive -exportPath . -exportOptionsPlist ../export-options-no-team.plist || true
+        
+        if [ ! -f *.ipa ]; then
+          echo "Trying alternative export method..."
+          xcodebuild -exportArchive -archivePath YemenMobileApp.xcarchive -exportPath . -exportFormat ipa
+        fi
+    
+    - name: Upload IPA
+      uses: actions/upload-artifact@v4
+      with:
+        name: YemenMobileApp-IPA-NoTeam
+        path: YemenMobileApp/*.ipa
+```
+
